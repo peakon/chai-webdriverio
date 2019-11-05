@@ -1,7 +1,9 @@
 import configWithDefaults from '../util/default-config';
 
-const doesOneElementHaveAttribute = function(client, selector, attribute, expected) {
-    let elements = client.$$(selector);
+const doesOneElementHaveAttribute = function(client, selectorOrElement, attribute, expected) {
+  const selector = selectorOrElement.constructor.name === 'Element' ? selectorOrElement.selector : selectorOrElement
+  let elements = client.$$(selector);
+
     let values = []
     let filteredList = elements.filter((element) => {
         let value = element.getAttribute(attribute);
