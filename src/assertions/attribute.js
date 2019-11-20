@@ -1,23 +1,18 @@
 import configWithDefaults from '../util/default-config';
 
-const matches = (expected, actual) => (expected instanceof RegExp) ? !!actual.match(expected) : actual === expected;
-
-const doesElementHaveAttribute = function(element, attribute, expected) {
-    const value = element.getAttribute(attribute);
-    return {
-        result: value ? matches(expected, value) : false,
-        values: [ value ]
-    }
-}
+const matches = (expected, actual) => (expected instanceof RegExp) ? !!(actual.match(expected)) : actual === expected;
 
 const doesOneElementHaveAttribute = function(client, selectorOrElement, attribute, expected) {
     let elements;
+    let query;
     switch (typeof selectorOrElement) {
         case 'string':
             elements = client.$$(selectorOrElement)
+            query = `matching <${selectorOrElement}>`
             break;
         case 'object':
-            elements = [ element ];
+            elements = [ selectorOrElement ];
+            query = `with <${selectorOrElement.selector}>`
             break;
         default:
             throw new Error(`${selectorOrElement} should be either String or Object`);
@@ -27,7 +22,8 @@ const doesOneElementHaveAttribute = function(client, selectorOrElement, attribut
 
     return {
         result: filteredValues.length > 0,
-        values
+        values,
+        query
     };
 }
 
@@ -51,8 +47,8 @@ export default function attribute(client, chai, utils, options) {
         let elementContainsAttribute = doesOneElementHaveAttribute(client, selectorOrElement, attribute, expected);
         this.assert(
           elementContainsAttribute.result,
-            `Expected an element matching <${selectorOrElement}> to contain attribute "${attribute}" with value "${expected}", but only found these values: ${elementContainsAttribute.values}`,
-            `Expected an element matching <${selectorOrElement}> not to contain attribute "${attribute} with value "${expected}", but found these attributes: ${elementContainsAttribute.values}`
+            `Expected an element ${elementContainsAttribute.query} to contain attribute "${attribute}" with value "${expected}", but only found these values: ${elementContainsAttribute.values}`,
+            `Expected an element ${elementContainsAttribute.query} not to contain attribute "${attribute} with value "${expected}", but found these attributes: ${elementContainsAttribute.values}`
         );
     });
 }
